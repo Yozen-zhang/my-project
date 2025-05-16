@@ -1,6 +1,6 @@
 <template>
   <div class="text-end">
-    <button class="btn btn-primary" type="button" @click="$refs.productModal.showModal">增加產品</button>
+    <button class="btn btn-primary" type="button" @click="openModal(true)">增加產品</button>
   </div>
   <table class="table mt-4">
   <thead>
@@ -28,14 +28,14 @@
       </td>
       <td>
         <div class="btn-group">
-          <button class="btn btn-outline-primary btn-sm">編輯</button>
+          <button class="btn btn-outline-primary btn-sm" @click="openModal(false,item)">編輯</button>
           <button class="btn btn-outline-danger btn-sm">刪除</button>
         </div>
       </td>
     </tr>
   </tbody>
 </table>
-<Productmodal ref="productModal"></Productmodal>
+<Productmodal ref="productModal" :product="tempProduct" @update-product="updateProduct"></Productmodal>
 </template>
 
 <script>
@@ -45,7 +45,9 @@ export default {
   data(){
     return {
       products: [],
-      pagination:{}
+      pagination:{},
+      tempProduct:{},
+      isNew: false,
     }
   },
   components: {
@@ -59,10 +61,41 @@ export default {
           if(res.data.success){
             this.products = res.data.products;
             this.pagination = res.data.pagination;
-            console.log(res.data)
           }
         })
-    }
+    },
+    openModal(isNew,item){
+      if(isNew){
+        this.tempProduct = {};
+      }else{
+        this.tempProduct = {...item}
+      }
+      this.isNew = isNew
+      const productComponent = this.$refs.productModal;
+      productComponent.showModal();
+    },
+    updateProduct(item){
+  this.tempProduct = { ...item }; // ← 安全地更新
+  const productComponent = this.$refs.productModal;
+
+  let api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product`;
+  let httpMethod = 'post';
+
+  if (!this.isNew) {
+    api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product/${item.id}`;
+    httpMethod = 'put';
+  }
+
+  this.$http[httpMethod](api, { data: this.tempProduct })
+    .then((res) => {
+      console.log(res);
+      productComponent.hideModal();
+      this.getProducts();
+    })
+    .catch((err) => {
+      console.error('新增或更新失敗：', err.response);
+    });
+   },
   },
   created() {
     this.getProducts()
