@@ -55,6 +55,7 @@ export default {
   components: {
      Productmodal,
   },
+  inject:['emitter'],
   methods:{
     getProducts(){
        const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products`
@@ -96,6 +97,20 @@ export default {
       this.isLoading = false
       productComponent.hideModal();
       this.getProducts();
+      if (res.data.success) {
+          this.getProducts();
+          this.emitter.emit('push-message', {
+            style: 'success',
+            title: '更新成功',
+          });
+        } else {
+          this.emitter.emit('push-message', {
+            style: 'danger',
+            title: '更新失敗',
+            content: res.data.message.join('、'),
+          });
+        }
+
     })
     .catch((err) => {
       console.error('新增或更新失敗：', err.response);
