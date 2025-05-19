@@ -36,11 +36,13 @@
     </tr>
   </tbody>
 </table>
+<pagination :pages="pagination" @emit-pages="getProducts"></pagination>
 <Productmodal ref="productModal" :product="tempProduct" @update-product="updateProduct"></Productmodal>
 </template>
 
 <script>
 import Productmodal from '../components/ProductModal.vue'
+import Pagination from '@/components/Pagination.vue'
 
 export default {
   data(){
@@ -54,11 +56,12 @@ export default {
   },
   components: {
      Productmodal,
+     Pagination
   },
   inject:['emitter'],
   methods:{
-    getProducts(){
-       const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products`
+    getProducts(page){
+       const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products/?page=${page}`
        this.isLoading = true
        this.$http.get(api)
         .then((res) => {
@@ -96,7 +99,6 @@ export default {
       console.log(res);
       this.isLoading = false
       productComponent.hideModal();
-      this.getProducts();
       if (res.data.success) {
           this.getProducts();
           this.emitter.emit('push-message', {
