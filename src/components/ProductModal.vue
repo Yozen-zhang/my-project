@@ -167,7 +167,7 @@
 </template>
 
 <script>
-import Modal from 'bootstrap/js/dist/modal'
+import ModalMixins from '@/mixins/modalMixins'
 
 export default {
   props: {
@@ -193,13 +193,8 @@ export default {
       tempProduct: {},
     }
   },
+  mixins:[ModalMixins],
   methods: {
-    showModal() {
-      this.modal.show()
-    },
-    hideModal() {
-      this.modal.hide()
-    },
     uploadFile() {
       const uploadedFile = this.$refs.fileInput.files[0]
       if (!uploadedFile) {
@@ -232,9 +227,6 @@ export default {
           alert('圖片上傳失敗，請確認網路與 API 設定')
         })
     },
-  },
-  mounted() {
-    this.modal = new Modal(this.$refs.modal)
   },
 }
 </script>
