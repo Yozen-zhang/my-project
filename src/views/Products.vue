@@ -1,4 +1,5 @@
 <template>
+   <Loading :active="isLoading"></Loading>
   <div class="text-end">
     <button class="btn btn-primary" type="button" @click="openModal(true)">增加產品</button>
   </div>
@@ -48,6 +49,7 @@ export default {
       pagination:{},
       tempProduct:{},
       isNew: false,
+      isLoading:false,
     }
   },
   components: {
@@ -56,8 +58,10 @@ export default {
   methods:{
     getProducts(){
        const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products`
-      this.$http.get(api)
+       this.isLoading = true
+       this.$http.get(api)
         .then((res) => {
+          this.isLoading = false;
           if(res.data.success){
             this.products = res.data.products;
             this.pagination = res.data.pagination;
@@ -85,10 +89,11 @@ export default {
     api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product/${item.id}`;
     httpMethod = 'put';
   }
-
+  this.isLoading = true
   this.$http[httpMethod](api, { data: this.tempProduct })
     .then((res) => {
       console.log(res);
+      this.isLoading = false
       productComponent.hideModal();
       this.getProducts();
     })
