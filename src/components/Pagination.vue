@@ -1,7 +1,6 @@
 <template>
   <nav aria-label="Page navigation example" class="my-3">
     <ul class="pagination justify-content-center align-items-center flex-wrap">
-
       <!-- 第一頁 -->
       <li class="page-item" :class="{ disabled: pages.current_page === 1 }">
         <a class="page-link" href="#" @click.prevent="changePage(1)">第一頁</a>
@@ -9,7 +8,12 @@
 
       <!-- 上一頁 -->
       <li class="page-item" :class="{ disabled: pages.current_page === 1 }">
-        <a class="page-link" href="#" aria-label="Previous" @click.prevent="changePage(pages.current_page - 1)">
+        <a
+          class="page-link"
+          href="#"
+          aria-label="Previous"
+          @click.prevent="changePage(pages.current_page - 1)"
+        >
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
@@ -27,15 +31,31 @@
       </li>
 
       <!-- 下一頁 -->
-      <li class="page-item" :class="{ disabled: pages.current_page === pages.total_pages }">
-        <a class="page-link" href="#" aria-label="Next" @click.prevent="changePage(pages.current_page + 1)">
+      <li
+        class="page-item"
+        :class="{ disabled: pages.current_page === pages.total_pages }"
+      >
+        <a
+          class="page-link"
+          href="#"
+          aria-label="Next"
+          @click.prevent="changePage(pages.current_page + 1)"
+        >
           <span aria-hidden="true">&raquo;</span>
         </a>
       </li>
 
       <!-- 最後一頁 -->
-      <li class="page-item" :class="{ disabled: pages.current_page === pages.total_pages }">
-        <a class="page-link" href="#" @click.prevent="changePage(pages.total_pages)">最後一頁</a>
+      <li
+        class="page-item"
+        :class="{ disabled: pages.current_page === pages.total_pages }"
+      >
+        <a
+          class="page-link"
+          href="#"
+          @click.prevent="changePage(pages.total_pages)"
+          >最後一頁</a
+        >
       </li>
 
       <!-- 跳轉輸入框 -->
@@ -44,14 +64,13 @@
         <input
           type="number"
           class="form-control"
-          style="width: 80px;"
+          style="width: 80px"
           min="1"
           :max="pages.total_pages"
           v-model.number="inputPage"
           @keyup.enter="jumpToPage"
         />
       </li>
-
     </ul>
   </nav>
 </template>
@@ -71,27 +90,23 @@ export default {
     },
   },
   methods: {
-  updatePage(page) {
-    this.$emit('emit-pages', page);
+    updatePage(page) {
+      this.$emit('emit-pages', page);
+    },
+    changePage(page) {
+      if (
+        page >= 1 &&
+        page <= this.pages.total_pages &&
+        page !== this.pages.current_page
+      ) {
+        this.updatePage(page);
+      }
+    },
+    jumpToPage() {
+      if (this.inputPage >= 1 && this.inputPage <= this.pages.total_pages) {
+        this.updatePage(this.inputPage);
+      }
+    },
   },
-  changePage(page) {
-    if (
-      page >= 1 &&
-      page <= this.pages.total_pages &&
-      page !== this.pages.current_page
-    ) {
-      this.updatePage(page);
-    }
-  },
-  jumpToPage() {
-    if (
-      this.inputPage >= 1 &&
-      this.inputPage <= this.pages.total_pages
-    ) {
-      this.updatePage(this.inputPage);
-    }
-  },
-}
 };
 </script>
-
