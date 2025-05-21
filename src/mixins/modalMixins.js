@@ -1,3 +1,4 @@
+// src/mixins/modalMixins.js
 import Modal from 'bootstrap/js/dist/modal';
 
 export default {

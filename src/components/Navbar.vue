@@ -1,7 +1,8 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <router-link class="navbar-brand" to="/dashboard">後台</router-link>
+
       <button
         class="navbar-toggler"
         type="button"
@@ -13,19 +14,41 @@
       >
         <span class="navbar-toggler-icon"></span>
       </button>
+
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
+            <router-link
+              class="nav-link"
+              to="/dashboard/products"
+              exact-active-class="active"
+            >
+              產品列表
+            </router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Features</a>
+            <router-link
+              class="nav-link"
+              to="/dashboard/orders"
+              exact-active-class="active"
+            >
+              訂單
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link
+              class="nav-link"
+              to="/dashboard/coupons"
+              exact-active-class="active"
+            >
+              優惠券
+            </router-link>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="logout">登出</a>
           </li>
         </ul>
-        <span class="navbar-text"> Navbar text with an inline element </span>
+        <span class="navbar-text">Navbar text with an inline element</span>
       </div>
     </div>
   </nav>

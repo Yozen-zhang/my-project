@@ -1,6 +1,6 @@
 <template>
   <div
-    class="toast"
+    class="toast fade"
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
@@ -15,7 +15,7 @@
       <button
         type="button"
         class="btn-close"
-        data-bs-dismiss="toast"
+        @click="$emit('dismiss')"
         aria-label="Close"
       ></button>
     </div>
@@ -44,6 +44,7 @@ export default {
       const toastEl = this.$refs.toast;
       const toast = new Toast(toastEl, {
         delay: 6000,
+        autohide: true,
       });
 
       toastEl.addEventListener('hidden.bs.toast', () => {
