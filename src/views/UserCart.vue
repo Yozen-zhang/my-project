@@ -316,6 +316,7 @@ export default {
       this.isLoading = true;
       this.$http.post(api, { data: form }).then((res) => {
         this.isLoading = false;
+        console.log(res.data.orderId);
         this.getCart(); 
         alert('訂單送出成功');
         this.form = {
@@ -327,11 +328,11 @@ export default {
           },
           message: ''
         };
+      this.$router.push(`/user/checkout/${res.data.orderId}`);
       }).catch((err) => {
         this.isLoading = false;
         alert(err.response.data.message || '送出訂單失敗');
       });
-
     }
   },
   created() {
