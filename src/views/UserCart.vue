@@ -70,7 +70,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item) in cart" :key="item.id">
+            <tr v-for="item in cart" :key="item.id">
               <td>{{ item.product.title }}</td>
               <td>
                 <div class="input-group">
@@ -90,7 +90,7 @@
                   class="btn btn-sm btn-danger"
                   @click="removeItem(item.id)"
                 >
-                  <i class="bi bi-trash"></i> 
+                  <i class="bi bi-trash"></i>
                 </button>
               </td>
             </tr>
@@ -98,19 +98,101 @@
           <tfoot>
             <tr>
               <td colspan="2" class="text-end fw-bold">總價格：</td>
-              <td class="fw-bold">{{ totalPrice }} 元</td>
+              <td class="fw-bold">{{ finalPrice }} 元</td>
               <td></td>
             </tr>
           </tfoot>
         </table>
 
         <div v-else class="alert alert-info">購物車目前無商品</div>
+        <!-- 優惠碼輸入區塊 -->
+        <div class="mt-4">
+          <h6>使用優惠碼</h6>
+          <div class="input-group mb-2">
+            <input
+              type="text"
+              class="form-control"
+              v-model="couponcode"
+              placeholder="輸入優惠碼，例如 SAVE10"
+            />
+            <button class="btn btn-primary" @click="applyCoupon">套用</button>
+          </div>
+          <div
+            v-if="couponMessage"
+            :class="['alert', isCouponValid ? 'alert-success' : 'alert-danger']"
+          >
+            {{ couponMessage }}
+          </div>
+        </div>
       </div>
+    </div>
+    <!-- 訂單資訊表單 -->
+    <div class="mt-5">
+      <h5>訂單資訊</h5>
+      <form @submit.prevent="submitOrder">
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input
+            id="email"
+            type="email"
+            v-model="form.user.email"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="name" class="form-label">收件人姓名</label>
+          <input
+            id="name"
+            type="text"
+            v-model="form.user.name"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="tel" class="form-label">收件人電話</label>
+          <input
+            id="tel"
+            type="tel"
+            v-model="form.user.tel"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="address" class="form-label">收件人地址</label>
+          <input
+            id="address"
+            type="text"
+            v-model="form.user.address"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="message" class="form-label">留言</label>
+          <textarea
+            id="message"
+            v-model="form.message"
+            class="form-control"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <button class="btn btn-success" type="submit">送出訂單</button>
+      </form>
     </div>
   </div>
 </template>
 
 <script>
+
+
 export default {
   data() {
     return {
@@ -120,15 +202,20 @@ export default {
       status: {
         loadingItem: '',
       },
+      couponcode: '',
+      couponMessage: '',
+      isCouponValid: false,
+      finalPrice: 0,
+      form: {
+      user: {
+        name: '',
+        email: '',
+        tel: '',
+        address: ''
+      },
+      message: ''
+    }
     };
-  },
-  computed: {
-    totalPrice() {
-      return this.cart.reduce(
-        (sum, item) => sum + item.product.price * item.qty,
-        0
-      );
-    },
   },
   methods: {
     getProducts() {
@@ -160,6 +247,7 @@ export default {
       this.isLoading = true;
       this.$http.get(api).then((res) => {
         this.cart = res.data.data.carts;
+        this.finalPrice = res.data.data.final_total;
         this.isLoading = false;
       });
     },
@@ -205,6 +293,46 @@ export default {
           console.error(err);
         });
     },
+    applyCoupon() {
+      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/coupon`;
+      const coupon = { code: this.couponcode };
+      this.isLoading = true;
+      this.$http.post(api, { data: coupon }).then((res) => {
+        this.isLoading = false;
+        console.log(res);
+        if (res.data.success) {
+          this.getCart();
+          this.couponMessage = res.data.message;
+          this.isCouponValid = true;
+        } else {
+          this.couponMessage = res.data.message;
+          this.isCouponValid = false;
+        }
+      });
+    },
+    submitOrder(){
+      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/order`;
+      const form = this.form
+      this.isLoading = true;
+      this.$http.post(api, { data: form }).then((res) => {
+        this.isLoading = false;
+        this.getCart(); 
+        alert('訂單送出成功');
+        this.form = {
+          user: {
+            name: '',
+            email: '',
+            tel: '',
+            address: ''
+          },
+          message: ''
+        };
+      }).catch((err) => {
+        this.isLoading = false;
+        alert(err.response.data.message || '送出訂單失敗');
+      });
+
+    }
   },
   created() {
     this.getProducts();
