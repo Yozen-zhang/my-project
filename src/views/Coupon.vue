@@ -60,7 +60,7 @@
 <script>
 import Pagination from '@/components/Pagination.vue';
 import CouponModal from '@/components/CouponModal.vue';
-import DeleteModal from '@/components/DeleteModal.vue'; // 改成 DeleteModal
+import DeleteModal from '@/components/DeleteModal.vue'; 
 
 export default {
   components: {
