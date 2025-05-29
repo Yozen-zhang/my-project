@@ -15,7 +15,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in products" :key="item.id">
+            <tr v-for="item in sortProducts" :key="item.id">
               <td><img :src="item.imageUrl" width="100" /></td>
               <td>{{ item.title }}</td>
               <td>{{ item.price }} 元</td>
@@ -30,12 +30,12 @@
                   <button
                     class="btn btn-outline-danger btn-sm"
                     @click="addCart(item.id)"
-                    :disabled="status.loadingItem === item.id"
+                    :disabled="loadingItem === item.id"
                   >
                     <div
                       class="spinner-border spinner-border-sm text-danger"
                       role="status"
-                      v-if="status.loadingItem === item.id"
+                      v-if="loadingItem === item.id"
                     >
                       <span class="visually-hidden">Loading...</span>
                     </div>
@@ -191,149 +191,155 @@
 </template>
 
 <script>
-
+import { mapState, mapActions } from 'pinia';
+import productStore from '@/stores/productStore';
+import { useStatusStore } from '@/stores/statusStore';
+import cartStore from '@/stores/cartStore';
 
 export default {
   data() {
     return {
-      products: [],
-      cart: [],
-      isLoading: false,
-      status: {
-        loadingItem: '',
-      },
-      couponcode: '',
-      couponMessage: '',
-      isCouponValid: false,
-      finalPrice: 0,
+      // products: [],
+      // cart: [],
+      // isLoading: false,
+      // status: {
+      //   loadingItem: '',
+      // },
+      // couponcode: '',
+      // couponMessage: '',
+      // isCouponValid: false,
+      // finalPrice: 0,
       form: {
-      user: {
-        name: '',
-        email: '',
-        tel: '',
-        address: ''
+        user: {
+          name: '',
+          email: '',
+          tel: '',
+          address: '',
+        },
+        message: '',
       },
-      message: ''
-    }
     };
   },
+  computed: {
+    ...mapState(productStore, ['sortProducts']),
+    ...mapState(useStatusStore, ['isLoading', 'loadingItem']),
+    ...mapState(cartStore, [
+      'cart',
+      'couponcode',
+      'couponMessage',
+      'isCouponValid',
+      'finalPrice',
+    ]),
+  },
   methods: {
-    getProducts() {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/products/all`;
-      this.isLoading = true;
-      this.$http.get(api).then((res) => {
-        this.products = res.data.products;
-        this.isLoading = false;
-      });
-    },
+    ...mapActions(productStore, ['getProducts']),
+    ...mapActions(cartStore, [
+      'addCart',
+      'getCart',
+      'removeItem',
+      'clearCart',
+      'onQtyChange',
+      'updateCartQty',
+    ]),
+    // getProducts() {
+    //   const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/products/all`;
+    //   this.isLoading = true;
+    //   this.$http.get(api).then((res) => {
+    //     this.products = res.data.products;
+    //     this.isLoading = false;
+    //   });
+    // },
     getinProduct(id) {
       this.$router.push(`/user/product/${id}`);
     },
-    addCart(productId) {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`;
-      this.status.loadingItem = productId;
-      this.$http
-        .post(api, { data: { product_id: productId, qty: 1 } })
-        .then(() => {
-          this.status.loadingItem = '';
-          this.getCart();
-        })
-        .catch(() => {
-          this.status.loadingItem = '';
-        });
-    },
-    getCart() {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`;
-      this.isLoading = true;
-      this.$http.get(api).then((res) => {
-        this.cart = res.data.data.carts;
-        this.finalPrice = res.data.data.final_total;
-        this.isLoading = false;
-      });
-    },
-    removeItem(cartId) {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${cartId}`;
-      this.$http.delete(api).then(() => {
-        this.getCart();
-      });
-    },
-    clearCart() {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/carts`;
-      this.$http
-        .delete(api)
-        .then(() => {
-          this.getCart();
-        })
-        .catch((err) => {
-          alert(err.response.data.message || '刪除全部失敗');
-        });
-    },
-    onQtyChange(item) {
-      if (item.qty < 1) {
-        item.qty = 1;
-      }
-      this.updateCartQty(item.id, item.qty);
-    },
-    updateCartQty(cartId, qty) {
-      const item = this.cart.find((i) => i.id === cartId);
-      if (!item) return;
+    // addCart(productId) {
+    //   const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`;
+    //   this.status.loadingItem = productId;
+    //   this.$http
+    //     .post(api, { data: { product_id: productId, qty: 1 } })
+    //     .then(() => {
+    //       this.status.loadingItem = '';
+    //       this.getCart();
+    //     })
+    //     .catch(() => {
+    //       this.status.loadingItem = '';
+    //     });
+    // },
+    // getCart() {
+    //   const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`;
+    //   this.isLoading = true;
+    //   this.$http.get(api).then((res) => {
+    //     this.cart = res.data.data.carts;
+    //     this.finalPrice = res.data.data.final_total;
+    //     this.isLoading = false;
+    //   });
+    // },
+    // removeItem(cartId) {
+    //   const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${cartId}`;
+    //   this.$http.delete(api).then(() => {
+    //     this.getCart();
+    //   });
+    // },
+    // clearCart() {
+    //   const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/carts`;
+    //   this.$http
+    //     .delete(api)
+    //     .then(() => {
+    //       this.getCart();
+    //     })
+    //     .catch((err) => {
+    //       alert(err.response.data.message || '刪除全部失敗');
+    //     });
+    // },
+    // onQtyChange(item) {
+    //   if (item.qty < 1) {
+    //     item.qty = 1;
+    //   }
+    //   this.updateCartQty(item.id, item.qty);
+    // },
+    // updateCartQty(cartId, qty) {
+    //   const item = this.cart.find((i) => i.id === cartId);
+    //   if (!item) return;
 
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${cartId}`;
+    //   const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${cartId}`;
+    //   this.$http
+    //     .put(api, {
+    //       data: {
+    //         product_id: item.product.id,
+    //         qty: qty,
+    //       },
+    //     })
+    //     .then(() => {
+    //       this.getCart();
+    //     })
+    //     .catch((err) => {
+    //       console.error(err);
+    //     });
+    // },
+    submitOrder() {
+      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/order`;
+      const form = this.form;
       this.$http
-        .put(api, {
-          data: {
-            product_id: item.product.id,
-            qty: qty,
-          },
-        })
-        .then(() => {
+        .post(api, { data: form })
+        .then((res) => {
+          console.log(res.data.orderId);
           this.getCart();
+          alert('訂單送出成功');
+          this.form = {
+            user: {
+              name: '',
+              email: '',
+              tel: '',
+              address: '',
+            },
+            message: '',
+          };
+          this.$router.push(`/user/checkout/${res.data.orderId}`);
         })
         .catch((err) => {
-          console.error(err);
+          alert(err.response.data.message || '送出訂單失敗');
         });
     },
-    applyCoupon() {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/coupon`;
-      const coupon = { code: this.couponcode };
-      this.isLoading = true;
-      this.$http.post(api, { data: coupon }).then((res) => {
-        this.isLoading = false;
-        console.log(res);
-        if (res.data.success) {
-          this.getCart();
-          this.couponMessage = res.data.message;
-          this.isCouponValid = true;
-        } else {
-          this.couponMessage = res.data.message;
-          this.isCouponValid = false;
-        }
-      });
-    },
-    submitOrder(){
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/order`;
-      const form = this.form
-      this.isLoading = true;
-      this.$http.post(api, { data: form }).then((res) => {
-        this.isLoading = false;
-        console.log(res.data.orderId);
-        this.getCart(); 
-        alert('訂單送出成功');
-        this.form = {
-          user: {
-            name: '',
-            email: '',
-            tel: '',
-            address: ''
-          },
-          message: ''
-        };
-      this.$router.push(`/user/checkout/${res.data.orderId}`);
-      }).catch((err) => {
-        this.isLoading = false;
-        alert(err.response.data.message || '送出訂單失敗');
-      });
-    }
   },
   created() {
     this.getProducts();
